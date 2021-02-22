@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RubyRemit", "RubyRemit\RubyRemit.csproj", "{DB50F02F-DA6E-4803-875A-61D57618DC10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RubyRemit.Domain", "RubyRemit.Domain\RubyRemit.Domain.csproj", "{57D85A64-B0AA-436C-B62E-8707EF337E0E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RubyRemit.Infrastructure", "RubyRemit.Infrastructure\RubyRemit.Infrastructure.csproj", "{001DF774-AA53-4B7F-910D-5572DF94E9AE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DB50F02F-DA6E-4803-875A-61D57618DC10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB50F02F-DA6E-4803-875A-61D57618DC10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB50F02F-DA6E-4803-875A-61D57618DC10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB50F02F-DA6E-4803-875A-61D57618DC10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57D85A64-B0AA-436C-B62E-8707EF337E0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57D85A64-B0AA-436C-B62E-8707EF337E0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57D85A64-B0AA-436C-B62E-8707EF337E0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57D85A64-B0AA-436C-B62E-8707EF337E0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{001DF774-AA53-4B7F-910D-5572DF94E9AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{001DF774-AA53-4B7F-910D-5572DF94E9AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{001DF774-AA53-4B7F-910D-5572DF94E9AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{001DF774-AA53-4B7F-910D-5572DF94E9AE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FE77A3B5-74A8-4FFC-95C0-5CE10ADC06E1}
+	EndGlobalSection
+EndGlobal
