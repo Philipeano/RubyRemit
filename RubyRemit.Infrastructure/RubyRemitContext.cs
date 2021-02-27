@@ -28,7 +28,6 @@ namespace RubyRemit.Infrastructure
             if (!optionsBuilder.IsConfigured)
             {
                 optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnStr"));
-                // optionsBuilder.UseSqlServer("Server=localhost;Initial Catalog=RubyRemitDB;Integrated Security=true;");
             }
         }
 
