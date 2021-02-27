@@ -9,7 +9,6 @@ namespace RubyRemit.Domain.Entities
     public class PaymentState
     {
         [Key]
-        [Column("PaymentStateId")]
         public long Id { get; set; }
 
 
