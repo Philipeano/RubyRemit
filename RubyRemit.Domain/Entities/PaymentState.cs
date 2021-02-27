@@ -32,6 +32,7 @@ namespace RubyRemit.Domain.Entities
         public string Remark { get; set; }
 
 
-        public Payment Payment { get; set; }
+        [ForeignKey(nameof(PaymentId))]
+        public virtual Payment Payment { get; set; }
     }
 }

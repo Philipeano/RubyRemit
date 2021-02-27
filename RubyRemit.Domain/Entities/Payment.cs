@@ -40,6 +40,6 @@ namespace RubyRemit.Domain.Entities
         public DateTime DateInitiated { get; set; }
 
 
-        public virtual List<PaymentState> ProcessingAttempts { get; set; }
+        public virtual ICollection<PaymentState> ProcessingAttempts { get; set; }
     }
 }
