@@ -9,7 +9,6 @@ namespace RubyRemit.Domain.Entities
     public class Payment
     {
         [Key]
-        [Column("PaymentId")]
         public long Id { get; set; }
 
 
@@ -34,10 +33,6 @@ namespace RubyRemit.Domain.Entities
         [Required]
         [Range((double)decimal.Zero, (double)decimal.MaxValue, ErrorMessage = "Amount must be a positive number.")]
         public decimal Amount { get; set; }
-
-
-        [Required]
-        public DateTime DateInitiated { get; set; }
 
 
         public virtual ICollection<PaymentState> ProcessingAttempts { get; set; }
