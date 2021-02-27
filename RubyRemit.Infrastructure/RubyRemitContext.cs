@@ -2,15 +2,19 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Configuration;
 using RubyRemit.Domain.Entities;
 
 namespace RubyRemit.Infrastructure
 {
-    public partial class RubyRemitDbContext : DbContext
+    public class RubyRemitContext : DbContext
     {
-        public RubyRemitDbContext(DbContextOptions<RubyRemitDbContext> options)
+        private readonly IConfiguration configuration;
+
+        public RubyRemitContext(DbContextOptions<RubyRemitContext> options, IConfiguration config)
             : base(options)
         {
+            configuration = config;
         }
 
 
@@ -23,7 +27,8 @@ namespace RubyRemit.Infrastructure
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Server=localhost;Initial Catalog=RubyRemitDB;Integrated Security=true;");
+                optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnStr"));
+                //optionsBuilder.UseSqlServer("Server=localhost;Initial Catalog=RubyRemitDB;Integrated Security=true;");
             }
         }
 
