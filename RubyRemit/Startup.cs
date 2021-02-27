@@ -27,6 +27,7 @@ namespace RubyRemit
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
             services
                 .AddDbContext<RubyRemitContext>(options => options
                 .UseSqlServer(Configuration.GetConnectionString("DefaultConnStr")));
