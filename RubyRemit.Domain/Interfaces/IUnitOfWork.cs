@@ -5,9 +5,9 @@ namespace RubyRemit.Domain.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {
-        public IRepository<Payment> PaymentRepository { get; }
+        public IGenericRepository<Payment> PaymentRepository { get; }
 
-        public IRepository<PaymentState> PaymentStateRepository { get; }
+        public IGenericRepository<PaymentState> PaymentStateRepository { get; }
 
 
         public void CommitChanges();
