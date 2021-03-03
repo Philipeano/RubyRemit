@@ -1,21 +1,18 @@
 ﻿using RubyRemit.Domain.Entities;
-using System;
 
 namespace RubyRemit.Domain.Interfaces
 {
-    public interface IUnitOfWork : IDisposable
+    public interface IUnitOfWork
     {
-        public IRepository<Payment> PaymentRepository { get; }
-
-        public IRepository<PaymentState> PaymentStateRepository { get; }
+        public IGenericRepository<Payment> PaymentRepository { get; }
 
 
-        public void CommitChanges();
+        public IGenericRepository<PaymentState> PaymentStateRepository { get; }
+
+
+        public void Commit();
 
 
         public void RejectChanges();
-
-
-        public new void Dispose();
     }
 }
