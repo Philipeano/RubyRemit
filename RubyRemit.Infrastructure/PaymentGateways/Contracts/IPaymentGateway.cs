@@ -13,6 +13,6 @@ namespace RubyRemit.Infrastructure.PaymentGateways.Contracts
 
         public decimal CalculateCommission(decimal amount, decimal commissionRate);
 
-        public bool ProcessTransaction(string cardNo, string holder, string expDate, string secCode, string transAmt, out string message);
+        public Task<bool> ProcessTransaction(string cardNo, string holder, DateTime expDate, string secCode, decimal transAmt, out string message);
     }
 }
