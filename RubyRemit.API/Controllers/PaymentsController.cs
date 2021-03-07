@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace RubyRemit.API.Controllers
+namespace RubyRemit.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
