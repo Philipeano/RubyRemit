@@ -8,7 +8,7 @@ namespace RubyRemit.Domain.Interfaces
 {
     public interface IPaymentRepository : IGenericRepository<Payment>
     {
-        public Payment AddPayment(string cardNo, string holder, string expDate, string secCode, string transAmt);
+        public Payment AddPayment(string cardNumber, string cardHolder, DateTime expirationDate, string securityCode, decimal amount);
 
 
         public PaymentStateEnum GetCurrentStatus(long paymentId);
