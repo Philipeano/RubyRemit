@@ -1,8 +1,11 @@
-﻿using System;
+﻿using RubyRemit.Business.Contracts;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace RubyRemit.Infrastructure.Utilities
+namespace RubyRemit.Business.Services
 {
-    public class Validator
+    public class Validator : IValidator
     {
         private bool IsBlank(dynamic input) => (input == null || input.ToString().Trim() == string.Empty);
 
@@ -11,7 +14,7 @@ namespace RubyRemit.Infrastructure.Utilities
         {
             output = null;
             errorMsg = string.Empty;
-            
+
             // Check for blank input
             if (IsBlank(input))
             {
