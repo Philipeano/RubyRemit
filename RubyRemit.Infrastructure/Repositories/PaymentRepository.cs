@@ -2,7 +2,6 @@
 using RubyRemit.Domain.Entities;
 using RubyRemit.Domain.Interfaces;
 using RubyRemit.Domain.LookUp;
-using RubyRemit.Infrastructure.Utilities;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
@@ -11,8 +10,6 @@ namespace RubyRemit.Infrastructure.Repositories
 {
     public class PaymentRepository : GenericRepository<Payment>, IPaymentRepository
     {
-        private readonly Validator validator = new Validator();
-
         private IQueryable<Payment> FetchAll()
         {
             return DbSet.Include(pmt => pmt.ProcessingAttempts.OrderByDescending(pst => pst.Id));
@@ -25,25 +22,8 @@ namespace RubyRemit.Infrastructure.Repositories
         }
 
 
-        public Payment AddPayment(string cardNo, string holder, string expDate, string secCode, string transAmt)
+        public Payment AddPayment(string cardNumber, string cardHolder, DateTime expirationDate, string securityCode, decimal amount)
         {
-            // Validate all input supplied by the user 
-            if (!validator.IsValidCardNumber(cardNo, out string cardNumber, out string errorMessage))
-                throw new Exception(errorMessage);
-
-            if (!validator.IsValidHolderName(holder, out string cardHolder, out errorMessage))
-                throw new Exception(errorMessage);
-
-            if (!validator.IsValidExpirationDate(expDate, out DateTime expirationDate, out errorMessage))
-                throw new Exception(errorMessage);
-
-            if (!validator.IsValidSecurityCode(secCode, out string securityCode, out errorMessage))
-                throw new Exception(errorMessage);
-
-            if (!validator.IsValidAmount(transAmt, out decimal amount, out errorMessage))
-                throw new Exception(errorMessage);
-
-            // Validate passed. Create new payment record
             try
             {
                 Payment newPayment = new Payment()
