@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RubyRemit.API", "RubyRemit\RubyRemit.API.csproj", "{DB50F02F-DA6E-4803-875A-61D57618DC10}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RubyRemit.Api", "RubyRemit.Api\RubyRemit.Api.csproj", "{DB50F02F-DA6E-4803-875A-61D57618DC10}"
 	ProjectSection(ProjectDependencies) = postProject
 		{57D85A64-B0AA-436C-B62E-8707EF337E0E} = {57D85A64-B0AA-436C-B62E-8707EF337E0E}
 		{001DF774-AA53-4B7F-910D-5572DF94E9AE} = {001DF774-AA53-4B7F-910D-5572DF94E9AE}
