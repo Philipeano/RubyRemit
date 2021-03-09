@@ -1,7 +1,7 @@
 ﻿using RubyRemit.Infrastructure.PaymentGateways.Contracts;
 using System;
 
-namespace RubyRemit.Infrastructure.PaymentGateways.Services
+namespace RubyRemit.Gateways.Services
 {
     public class BasicPaymentService : PaymentServiceBase, ICheapPaymentGateway
     {
