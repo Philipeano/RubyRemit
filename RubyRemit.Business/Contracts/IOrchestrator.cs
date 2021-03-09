@@ -11,6 +11,6 @@ namespace RubyRemit.Business.Contracts
         public void ConfigureProcessingRules(decimal amount);
 
 
-        public Task<bool> ConsumePaymentService();
+        public Task<GatewayResponse> ConsumePaymentService();
     }
 }

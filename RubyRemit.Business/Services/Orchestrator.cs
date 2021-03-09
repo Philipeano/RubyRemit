@@ -5,8 +5,10 @@ using RubyRemit.Domain.Interfaces;
 using RubyRemit.Domain.LookUp;
 using RubyRemit.Infrastructure.PaymentGateways.Contracts;
 using System;
-using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace RubyRemit.Business.Services
@@ -22,11 +24,14 @@ namespace RubyRemit.Business.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator _validator;
 
+        private GatewayRequest _requestBody;
         private string _cardNumber;
         private string _holderName;
         private DateTime _expirationDate;
         private string _securityCode;
         private decimal _amount;
+
+        private HttpClient _httpClient = new HttpClient();
 
 
         public bool IsConfigured => _isConfigured;
@@ -58,6 +63,15 @@ namespace RubyRemit.Business.Services
             {
                 try
                 {
+                    _requestBody = new GatewayRequest()
+                    {
+                        CreditCardNumber = paymentInfo.CreditCardNumber,
+                        CardHolder = paymentInfo.CardHolder,
+                        ExpirationDate = paymentInfo.ExpirationDate,
+                        SecurityCode = paymentInfo.SecurityCode,
+                        Amount = paymentInfo.Amount
+                    };
+
                     ConfigureProcessingRules(_amount);
                 }
                 catch (Exception ex)
@@ -99,37 +113,50 @@ namespace RubyRemit.Business.Services
         }
 
 
-        public async Task<bool> ConsumePaymentService()
+        public async Task<GatewayResponse> ConsumePaymentService()
         {
-            bool processingSucceeded = false;
+            GatewayResponse gatewayResponse = new GatewayResponse();
 
             try
             {
                 Payment newPayment = CreatePaymentRecord();
+                _httpClient.BaseAddress = new Uri("https://localhost:1000/"); // TODO: Extract this line into Startup.CongureServices()
+                string relativePath = "api/gateways/process";
 
                 // Attempt processing with preferred payment gateway
                 _numberOfAttempts = 1;
-                processingSucceeded = await _preferredGateway.ProcessTransaction(_cardNumber, _holderName, _expirationDate, _securityCode, _amount, out string message);
-                newPayment.ProcessingAttempts.Add(CreatePaymentStateRecord(newPayment, processingSucceeded, _preferredGateway.ServiceName, message));
+                _requestBody.GatewayOption = _preferredGateway.ServiceName.ToLower().Contains("cheap") ? "cheap" : "expensive";
+                StringContent requestBodyJson = new StringContent(JsonSerializer.Serialize(_requestBody), Encoding.UTF8, "application/json");
+                var httpResponse = await _httpClient.PostAsync(relativePath, requestBodyJson);
+                gatewayResponse.Succeeded = httpResponse.IsSuccessStatusCode;
+                gatewayResponse.Message = httpResponse.Content.ToString();
+                newPayment.ProcessingAttempts.Add(CreatePaymentStateRecord(newPayment, gatewayResponse.Succeeded, _preferredGateway.ServiceName, gatewayResponse.Message));
 
                 // If processing fails at first attempt, try subsequently with backup gateway (subject to maximum allowed retries)
-                while (!processingSucceeded && _numberOfAttempts < _maximumAttempts)
+                while (httpResponse.StatusCode != HttpStatusCode.OK && _numberOfAttempts < _maximumAttempts)
+                // while (!gatewayResponse.Succeeded && _numberOfAttempts < _maximumAttempts)
                 {
                     _numberOfAttempts += 1;
-                    processingSucceeded = await _backupGateway.ProcessTransaction(_cardNumber, _holderName, _expirationDate, _securityCode, _amount, out message);
-                    newPayment.ProcessingAttempts.Add(CreatePaymentStateRecord(newPayment, processingSucceeded, _backupGateway.ServiceName, message));
+                    _requestBody.GatewayOption = _backupGateway.ServiceName.ToLower().Contains("cheap") || _backupGateway.ServiceName.ToLower().Contains("basic") ? "cheap" : "expensive";
+                    requestBodyJson = new StringContent(JsonSerializer.Serialize(_requestBody), Encoding.UTF8, "application/json");
+                    httpResponse = await _httpClient.PostAsync(relativePath, requestBodyJson);
+                    gatewayResponse.Succeeded = httpResponse.IsSuccessStatusCode;
+                    gatewayResponse.Message = httpResponse.Content.ToString();
+                    newPayment.ProcessingAttempts.Add(CreatePaymentStateRecord(newPayment, gatewayResponse.Succeeded, _preferredGateway.ServiceName, gatewayResponse.Message));
                 }
 
                 // Save payment and payment state info to database
                 _unitOfWork.PaymentRepository.Add(newPayment);
                 _unitOfWork.Commit();
+                return gatewayResponse;
             }
-            catch
+            catch (Exception ex)
             {
+                // Discard all entity changes and report exception
                 _unitOfWork.RejectChanges();
+                gatewayResponse = new GatewayResponse() { Succeeded = false, Message = ex.Message };
+                return gatewayResponse;
             }
-
-            return processingSucceeded;
         }
 
 
