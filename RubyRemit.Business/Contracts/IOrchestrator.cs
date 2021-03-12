@@ -5,12 +5,12 @@ namespace RubyRemit.Business.Contracts
 {
     public interface IOrchestrator
     {
-        public bool ValidateUserInput(PaymentRequestBody paymentInfo, out string validationMessage);
+        public bool ValidateUserInput(RequestBody paymentInfo, out string validationMessage);
 
 
         public void ConfigureProcessingRules(decimal amount);
 
 
-        public Task<GatewayResponse> ConsumePaymentService();
+        public Task<ResponseBody> ConsumePaymentService();
     }
 }
