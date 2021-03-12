@@ -2,9 +2,9 @@
 
 namespace RubyRemit.Domain.DTOs
 {
-    public class PaymentResponseBody
+    public class ResponseBody
     {
-        public bool Result { get; set; }
+        public bool Succeeded { get; set; }
 
 
         public string Message { get; set; }

@@ -1,6 +1,6 @@
 ﻿namespace RubyRemit.Domain.DTOs
 {
-    public class GatewayRequest : PaymentRequestBody
+    public class GatewayRequest : RequestBody
     {
         public string GatewayOption { get; set; }
     }
