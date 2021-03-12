@@ -36,7 +36,7 @@ namespace RubyRemit.Api.Controllers
         /// <item><term>amount</term> The amount to be processed, in British pounds</item>
         /// </list>
         /// </remarks>
-        /// <returns>A JSON object containing <c>result</c> (bool), <c>message</c> (string) and <c>data</c> (object) properties.</returns>
+        /// <returns>A JSON object containing a <c>succeeded</c> (bool), <c>message</c> (string) and <c>data</c> (object) properties.</returns>
         /// <response code="200">Success! Payment was processed successfully.</response> 
         /// <response code="400">Bad request! Invalid input detected. See details in response body.</response>
         /// <response code="500">Error! Unable to process the payment at this time. See details in response body.</response>
@@ -44,29 +44,29 @@ namespace RubyRemit.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(object))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(object))]
         [HttpPost("processpayment")]
-        //public ActionResult<PaymentResponseBody> ProcessPaymentAsync([FromBody] PaymentRequestBody paymentRequest)
-        public async Task<ActionResult<PaymentResponseBody>> ProcessPaymentAsync([FromBody] PaymentRequestBody paymentRequest)
+        public async Task<ActionResult<ResponseBody>> ProcessPaymentAsync([FromBody] RequestBody paymentRequest)
         {
+            ResponseBody processingResult;
             try
             {
                 bool validationResult = _orchestrator.ValidateUserInput(paymentRequest, out string validationMessage);
                 if (!validationResult)
                 {
-                    return BadRequest(JsonSerializer.Serialize(new { message = validationMessage }, typeof(object)));
+                    processingResult = new ResponseBody() { Succeeded = false, Message = validationMessage, Data = null };
+                    return BadRequest(processingResult);
                 }
 
-                GatewayResponse processingResult = await _orchestrator.ConsumePaymentService();
+                processingResult = await _orchestrator.ConsumePaymentService();
                 if (!processingResult.Succeeded)
                 {
-                    return StatusCode(StatusCodes.Status500InternalServerError, 
-                        JsonSerializer.Serialize(new { message = "Unable to process the payment at this time. Please try again." }, 
-                        typeof(object)));
+                    return StatusCode(StatusCodes.Status500InternalServerError, processingResult);
                 }
-                return StatusCode(StatusCodes.Status200OK, JsonSerializer.Serialize(new { message = "Payment processed successfully." }, typeof(object)));                
+                return StatusCode(StatusCodes.Status200OK, processingResult);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, JsonSerializer.Serialize(new { message = ex.Message }, typeof(object)));
+                processingResult = new ResponseBody() { Succeeded = false, Message = ex.Message, Data = null };
+                return StatusCode(StatusCodes.Status500InternalServerError, processingResult);
             }
         }
     }

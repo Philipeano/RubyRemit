@@ -62,26 +62,25 @@ namespace RubyRemit.Gateways.Controllers
                     break;
                 default:
                     gatewayResponse = new GatewayResponse() { Succeeded = false, Message = "Missing or invalid payment gateway option." };
-                    return StatusCode(StatusCodes.Status400BadRequest, JsonSerializer.Serialize(gatewayResponse, typeof(GatewayResponse)));
+                    return StatusCode(StatusCodes.Status400BadRequest, gatewayResponse);
             }
-
 
             try
             {
                 gatewayResponse = await _selectedService.ProcessTransaction(request);
                 if (!gatewayResponse.Succeeded)
                 {
-                    return StatusCode(StatusCodes.Status500InternalServerError, JsonSerializer.Serialize(gatewayResponse, typeof(GatewayResponse)));
+                    return StatusCode(StatusCodes.Status500InternalServerError, gatewayResponse);
                 }
                 else
                 {
-                    return StatusCode(StatusCodes.Status200OK, JsonSerializer.Serialize(gatewayResponse, typeof(GatewayResponse)));
+                    return StatusCode(StatusCodes.Status200OK, gatewayResponse);
                 }
             }
             catch (Exception ex)
             {
                 gatewayResponse = new GatewayResponse(){ Succeeded = false, Message = ex.Message };
-                return StatusCode(StatusCodes.Status500InternalServerError, JsonSerializer.Serialize(gatewayResponse, typeof(GatewayResponse)));
+                return StatusCode(StatusCodes.Status500InternalServerError, gatewayResponse);
             }
         }
     }
