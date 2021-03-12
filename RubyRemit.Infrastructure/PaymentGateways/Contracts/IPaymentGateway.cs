@@ -14,6 +14,6 @@ namespace RubyRemit.Infrastructure.PaymentGateways.Contracts
         public decimal CalculateCommission(decimal amount, decimal commissionRate);
 
 
-        public Task<GatewayResponse> ProcessTransaction(PaymentRequestBody request);
+        public Task<GatewayResponse> ProcessTransaction(RequestBody request);
    }
 }
