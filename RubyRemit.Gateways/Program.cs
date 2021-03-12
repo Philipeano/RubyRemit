@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using RubyRemit.Api;
 
-namespace RubyRemit
+namespace RubyRemit.Gateways
 {
     public class Program
     {

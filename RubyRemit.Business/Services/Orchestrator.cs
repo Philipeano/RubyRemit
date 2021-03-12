@@ -1,47 +1,54 @@
-﻿using RubyRemit.Business.Contracts;
+﻿using AutoMapper;
+using Newtonsoft.Json.Linq;
+using RubyRemit.Business.Contracts;
 using RubyRemit.Domain.DTOs;
 using RubyRemit.Domain.Entities;
 using RubyRemit.Domain.Interfaces;
 using RubyRemit.Domain.LookUp;
-using RubyRemit.Infrastructure.PaymentGateways.Contracts;
 using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace RubyRemit.Business.Services
 {
     public class Orchestrator : IOrchestrator
     {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IValidator _validator;
+        private readonly HttpClient _httpClient;
+        private readonly IMapper _mapper;
+
         private bool _isConfigured = false;
         private short _maximumAttempts;
         private short _numberOfAttempts;
 
-        private readonly IPaymentGateway _cheapService, _expensiveService;
-        private IPaymentGateway _preferredGateway, _backupGateway;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IValidator _validator;
-
+        private GatewayRequest _requestBody;
         private string _cardNumber;
         private string _holderName;
         private DateTime _expirationDate;
         private string _securityCode;
         private decimal _amount;
 
+        private string _preferredGateway, _backupGateway;
+
 
         public bool IsConfigured => _isConfigured;
 
 
-        public Orchestrator(ICheapPaymentGateway cheapGateway, IExpensivePaymentGateway expensiveGateway, IValidator validator, IUnitOfWork unitOfWork)
+        public Orchestrator(IValidator validator, IUnitOfWork unitOfWork, IHttpClientFactory clientFactory, IMapper mapper)
         {
-            _cheapService = cheapGateway;
-            _expensiveService = expensiveGateway;
             _validator = validator;
             _unitOfWork = unitOfWork;
+            _httpClient = clientFactory.CreateClient("paymentGateway");
+            _mapper = mapper;
         }
 
 
-        public bool ValidateUserInput(PaymentRequestBody paymentInfo, out string validationMessage)
+        public bool ValidateUserInput(MainRequestBody paymentInfo, out string validationMessage)
         {
             bool validationResult, result1, result2, result3, result4, result5;
 
@@ -52,12 +59,21 @@ namespace RubyRemit.Business.Services
             result5 = _validator.IsValidAmount(paymentInfo.Amount.ToString(), out _amount, out string message5);
 
             validationMessage = $"{message1} {message2} {message3} {message4} {message5}";
-            validationResult = result1 || result2 || result3 || result4 || result5;
+            validationResult = result1 && result2 && result3 && result4 && result5;
 
             if (validationResult)
             {
                 try
                 {
+                    _requestBody = new GatewayRequest()
+                    {
+                        CreditCardNumber = paymentInfo.CreditCardNumber,
+                        CardHolder = paymentInfo.CardHolder,
+                        ExpirationDate = paymentInfo.ExpirationDate,
+                        SecurityCode = paymentInfo.SecurityCode,
+                        Amount = paymentInfo.Amount
+                    };
+
                     ConfigureProcessingRules(_amount);
                 }
                 catch (Exception ex)
@@ -76,19 +92,19 @@ namespace RubyRemit.Business.Services
 
             if (amount <= 20)
             {
-                _preferredGateway = _cheapService;
+                _preferredGateway = "cheap";
                 _maximumAttempts = 1;
             }
             else if (amount >= 21 && amount <= 500)
             {
-                _preferredGateway = _expensiveService;
-                _backupGateway = _cheapService;
+                _preferredGateway = "expensive";
+                _backupGateway = "cheap";
                 _maximumAttempts = 2;
             }
             else if (amount > 500)
             {
-                _preferredGateway = _expensiveService;
-                _backupGateway = _expensiveService;
+                _preferredGateway = "expensive";
+                _backupGateway = "expensive";
                 _maximumAttempts = 4;
             }
             else
@@ -99,37 +115,43 @@ namespace RubyRemit.Business.Services
         }
 
 
-        public async Task<bool> ConsumePaymentService()
+        public async Task<MainResponseBody> ConsumePaymentService()
         {
-            bool processingSucceeded = false;
+            string relativePath = "/api/gateways/process";
+            MainResponseBody result;
 
             try
             {
-                Payment newPayment = CreatePaymentRecord();
-
                 // Attempt processing with preferred payment gateway
                 _numberOfAttempts = 1;
-                processingSucceeded = await _preferredGateway.ProcessTransaction(_cardNumber, _holderName, _expirationDate, _securityCode, _amount, out string message);
-                newPayment.ProcessingAttempts.Add(CreatePaymentStateRecord(newPayment, processingSucceeded, _preferredGateway.ServiceName, message));
+                result = await SendRequestAsync(_requestBody, _preferredGateway, relativePath);
+                Payment paymentInfo = CreatePaymentRecord();
+                paymentInfo.ProcessingAttempts.Add(CreatePaymentStateRecord(paymentInfo, result.Succeeded, _preferredGateway, result.Message));
 
                 // If processing fails at first attempt, try subsequently with backup gateway (subject to maximum allowed retries)
-                while (!processingSucceeded && _numberOfAttempts < _maximumAttempts)
+                while (!result.Succeeded && _numberOfAttempts < _maximumAttempts)
                 {
                     _numberOfAttempts += 1;
-                    processingSucceeded = await _backupGateway.ProcessTransaction(_cardNumber, _holderName, _expirationDate, _securityCode, _amount, out message);
-                    newPayment.ProcessingAttempts.Add(CreatePaymentStateRecord(newPayment, processingSucceeded, _backupGateway.ServiceName, message));
+                    result = await SendRequestAsync(_requestBody, _backupGateway, relativePath);
+                    paymentInfo.ProcessingAttempts.Add(CreatePaymentStateRecord(paymentInfo, result.Succeeded, _backupGateway, result.Message));
                 }
 
                 // Save payment and payment state info to database
-                _unitOfWork.PaymentRepository.Add(newPayment);
+                _unitOfWork.PaymentRepository.Add(paymentInfo);
                 _unitOfWork.Commit();
-            }
-            catch
-            {
-                _unitOfWork.RejectChanges();
-            }
 
-            return processingSucceeded;
+                // Return details of payment and processing attempts
+                PaymentDTO paymentSummary = _mapper.Map<PaymentDTO>(paymentInfo);
+                result.Data = paymentSummary;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Discard all entity changes and report exception
+                _unitOfWork.RejectChanges();
+                result = new MainResponseBody() { Succeeded = false, Message = ex.Message, Data = null };
+                return result;
+            }
         }
 
 
@@ -141,7 +163,8 @@ namespace RubyRemit.Business.Services
                 CardHolder = _holderName,
                 ExpirationDate = _expirationDate,
                 SecurityCode = _securityCode,
-                Amount = _amount
+                Amount = _amount,
+                ProcessingAttempts = new List<PaymentState>() { }
             };
         }
 
@@ -156,6 +179,19 @@ namespace RubyRemit.Business.Services
                 State = result ? PaymentStateEnum.Processed : PaymentStateEnum.Failed,
                 Remark = remark
             };
+        }
+
+
+        private async Task<MainResponseBody> SendRequestAsync(GatewayRequest requestBody, string gatewayOption, string uriPath)
+        {
+            MainResponseBody response = new MainResponseBody();
+            requestBody.GatewayOption = gatewayOption == "cheap" ? "cheap" : "expensive";
+            var requestContent = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+            var httpResponse = await _httpClient.PostAsync(uriPath, requestContent);
+            var responseContent = await httpResponse.Content.ReadAsStringAsync();
+            response.Succeeded = (bool)JObject.Parse(responseContent)["succeeded"];
+            response.Message = (string)JObject.Parse(responseContent)["message"];
+            return response; 
         }
     }
 }

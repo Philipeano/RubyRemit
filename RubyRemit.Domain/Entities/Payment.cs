@@ -26,7 +26,7 @@ namespace RubyRemit.Domain.Entities
         public DateTime ExpirationDate { get; set; }
 
 
-        [RegularExpression("/[0-9]{3}/", ErrorMessage = "Security Code must be exactly 3 digits.")]
+        [RegularExpression("[0-9]{3}", ErrorMessage = "Security Code must be exactly 3 digits.")]
         public string SecurityCode { get; set; }
 
 

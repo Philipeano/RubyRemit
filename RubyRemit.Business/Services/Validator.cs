@@ -7,7 +7,16 @@ namespace RubyRemit.Business.Services
 {
     public class Validator : IValidator
     {
-        private bool IsBlank(dynamic input) => (input == null || input.ToString().Trim() == string.Empty);
+        private bool IsBlank(dynamic input)
+        {
+            if (input == null)
+                return true;
+            else if (input.GetType() == typeof(string) && input.Trim() == string.Empty)
+                return true;
+            else if (input.ToString().Trim() == string.Empty)
+                return true;
+            else return false;
+        }
 
 
         public bool IsValidCardNumber(string input, out string output, out string errorMsg)
