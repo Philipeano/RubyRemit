@@ -16,15 +16,13 @@ namespace RubyRemit.Business.Services
 {
     public class Orchestrator : IOrchestrator
     {
-        private bool _isConfigured = false;
-        private short _maximumAttempts;
-        private short _numberOfAttempts;
-
-        //private readonly IPaymentGateway _cheapService, _expensiveService;
-        //private IPaymentGateway _preferredGateway, _backupGateway;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator _validator;
         private readonly HttpClient _httpClient;
+
+        private bool _isConfigured = false;
+        private short _maximumAttempts;
+        private short _numberOfAttempts;
 
         private GatewayRequest _requestBody;
         private string _cardNumber;
@@ -39,18 +37,15 @@ namespace RubyRemit.Business.Services
         public bool IsConfigured => _isConfigured;
 
 
-        public Orchestrator(//ICheapPaymentGateway cheapGateway, IExpensivePaymentGateway expensiveGateway,
-            IValidator validator, IUnitOfWork unitOfWork, IHttpClientFactory clientFactory)
+        public Orchestrator(IValidator validator, IUnitOfWork unitOfWork, IHttpClientFactory clientFactory)
         {
-            //_cheapService = cheapGateway;
-            //_expensiveService = expensiveGateway;
             _validator = validator;
             _unitOfWork = unitOfWork;
             _httpClient = clientFactory.CreateClient("paymentGateway");
         }
 
 
-        public bool ValidateUserInput(RequestBody paymentInfo, out string validationMessage)
+        public bool ValidateUserInput(MainRequestBody paymentInfo, out string validationMessage)
         {
             bool validationResult, result1, result2, result3, result4, result5;
 
@@ -117,10 +112,10 @@ namespace RubyRemit.Business.Services
         }
 
 
-        public async Task<ResponseBody> ConsumePaymentService()
+        public async Task<MainResponseBody> ConsumePaymentService()
         {
             string relativePath = "/api/gateways/process";
-            ResponseBody result;
+            MainResponseBody result;
 
             try
             {
@@ -148,7 +143,7 @@ namespace RubyRemit.Business.Services
             {
                 // Discard all entity changes and report exception
                 _unitOfWork.RejectChanges();
-                result = new ResponseBody() { Succeeded = false, Message = ex.Message, Data = null };
+                result = new MainResponseBody() { Succeeded = false, Message = ex.Message, Data = null };
                 return result;
             }
         }
@@ -181,9 +176,9 @@ namespace RubyRemit.Business.Services
         }
 
 
-        private async Task<ResponseBody> SendRequestAsync(GatewayRequest requestBody, string gatewayOption, string uriPath)
+        private async Task<MainResponseBody> SendRequestAsync(GatewayRequest requestBody, string gatewayOption, string uriPath)
         {
-            ResponseBody response = new ResponseBody();
+            MainResponseBody response = new MainResponseBody();
             requestBody.GatewayOption = gatewayOption == "cheap" ? "cheap" : "expensive";
             var requestContent = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
             var httpResponse = await _httpClient.PostAsync(uriPath, requestContent);

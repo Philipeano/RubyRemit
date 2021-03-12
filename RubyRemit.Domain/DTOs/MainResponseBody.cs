@@ -2,7 +2,7 @@
 
 namespace RubyRemit.Domain.DTOs
 {
-    public class ResponseBody
+    public class MainResponseBody
     {
         public bool Succeeded { get; set; }
 

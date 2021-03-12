@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RubyRemit.Domain.DTOs
 {
-    public class RequestBody
+    public class MainRequestBody
     {
         [Required]
         [CreditCard]

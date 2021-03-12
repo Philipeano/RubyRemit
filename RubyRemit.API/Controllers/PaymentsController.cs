@@ -44,15 +44,15 @@ namespace RubyRemit.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(object))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(object))]
         [HttpPost("processpayment")]
-        public async Task<ActionResult<ResponseBody>> ProcessPaymentAsync([FromBody] RequestBody paymentRequest)
+        public async Task<ActionResult<MainResponseBody>> ProcessPaymentAsync([FromBody] MainRequestBody paymentRequest)
         {
-            ResponseBody processingResult;
+            MainResponseBody processingResult;
             try
             {
                 bool validationResult = _orchestrator.ValidateUserInput(paymentRequest, out string validationMessage);
                 if (!validationResult)
                 {
-                    processingResult = new ResponseBody() { Succeeded = false, Message = validationMessage, Data = null };
+                    processingResult = new MainResponseBody() { Succeeded = false, Message = validationMessage, Data = null };
                     return BadRequest(processingResult);
                 }
 
@@ -65,7 +65,7 @@ namespace RubyRemit.Api.Controllers
             }
             catch (Exception ex)
             {
-                processingResult = new ResponseBody() { Succeeded = false, Message = ex.Message, Data = null };
+                processingResult = new MainResponseBody() { Succeeded = false, Message = ex.Message, Data = null };
                 return StatusCode(StatusCodes.Status500InternalServerError, processingResult);
             }
         }

@@ -23,7 +23,7 @@ namespace RubyRemit.Gateways.Services
         }
 
 
-        public Task<GatewayResponse> ProcessTransaction(RequestBody request)
+        public Task<GatewayResponse> ProcessTransaction(MainRequestBody request)
         {
             GatewayResponse response = new GatewayResponse();
 
