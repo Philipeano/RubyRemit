@@ -60,6 +60,8 @@ namespace RubyRemit.Api
                 c.DefaultRequestHeaders.Add("Accept", "application/json");
                 c.Timeout = new System.TimeSpan(0, 0, 30);
             });
+
+            services.AddAutoMapper(c => c.AddProfile<AutoMapping>(), typeof(Startup));
         }
 
 
