@@ -10,6 +10,6 @@ namespace RubyRemit.Domain.DTOs
         public string Message { get; set; }
 
 
-        public Payment Data { get; set; }
+        public PaymentDTO Data { get; set; }
     }
 }

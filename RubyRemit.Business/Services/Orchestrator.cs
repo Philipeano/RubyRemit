@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using AutoMapper;
+using Newtonsoft.Json.Linq;
 using RubyRemit.Business.Contracts;
 using RubyRemit.Domain.DTOs;
 using RubyRemit.Domain.Entities;
@@ -19,6 +20,7 @@ namespace RubyRemit.Business.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator _validator;
         private readonly HttpClient _httpClient;
+        private readonly IMapper _mapper;
 
         private bool _isConfigured = false;
         private short _maximumAttempts;
@@ -37,11 +39,12 @@ namespace RubyRemit.Business.Services
         public bool IsConfigured => _isConfigured;
 
 
-        public Orchestrator(IValidator validator, IUnitOfWork unitOfWork, IHttpClientFactory clientFactory)
+        public Orchestrator(IValidator validator, IUnitOfWork unitOfWork, IHttpClientFactory clientFactory, IMapper mapper)
         {
             _validator = validator;
             _unitOfWork = unitOfWork;
             _httpClient = clientFactory.CreateClient("paymentGateway");
+            _mapper = mapper;
         }
 
 
@@ -136,7 +139,10 @@ namespace RubyRemit.Business.Services
                 // Save payment and payment state info to database
                 _unitOfWork.PaymentRepository.Add(paymentInfo);
                 _unitOfWork.Commit();
-                result.Data = paymentInfo;
+
+                // Return details of payment and processing attempts
+                PaymentDTO paymentSummary = _mapper.Map<PaymentDTO>(paymentInfo);
+                result.Data = paymentSummary;
                 return result;
             }
             catch (Exception ex)
