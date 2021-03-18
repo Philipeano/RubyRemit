@@ -27,7 +27,7 @@ namespace RubyRemit.Api.Controllers
         /// </summary>
         /// <param name="paymentRequest">A JSON object containing payment details.</param>
         /// <remarks>
-        /// The properties of the <c>request</c> parameter are described below: 
+        /// The properties of the <c>paymentRequest</c> parameter are described below: 
         /// <list type="bullet">
         /// <item><term>creditCardNumber</term> The credit card number for this transaction</item>
         /// <item><term>cardHolder</term> The customer name shown on the credit card</item>
@@ -44,7 +44,7 @@ namespace RubyRemit.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(object))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(object))]
         [HttpPost("processpayment")]
-        public async Task<ActionResult<MainResponseBody>> ProcessPaymentAsync([FromBody] MainRequestBody paymentRequest)
+        public async Task<ActionResult<MainResponseBody>> ProcessPayment([FromBody] MainRequestBody paymentRequest)
         {
             MainResponseBody processingResult;
             try
