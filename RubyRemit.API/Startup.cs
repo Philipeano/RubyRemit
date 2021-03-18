@@ -10,6 +10,7 @@ using RubyRemit.Business.Contracts;
 using RubyRemit.Business.Services;
 using RubyRemit.Domain.Interfaces;
 using RubyRemit.Infrastructure;
+using RubyRemit.Infrastructure.AutoMapperSettings.Profiles;
 using RubyRemit.Infrastructure.Repositories;
 
 namespace RubyRemit.Api
@@ -61,7 +62,7 @@ namespace RubyRemit.Api
                 c.Timeout = new System.TimeSpan(0, 0, 30);
             });
 
-            services.AddAutoMapper(c => c.AddProfile<AutoMapping>(), typeof(Startup));
+            services.AddAutoMapper(c => c.AddProfile<DefaultProfile>(), typeof(Startup));
         }
 
 
