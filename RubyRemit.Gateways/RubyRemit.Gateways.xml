@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>RubyRemit.Gateways</name>
+    </assembly>
+    <members>
+        <member name="M:RubyRemit.Gateways.Controllers.GatewaysController.ProcessAsync(RubyRemit.Domain.DTOs.GatewayRequest)">
+            <summary>
+            Receives a payment processing request from a 3rd-party and invokes one of the gateway implementations to handle processing. 
+            </summary>
+            <param name="request">A JSON object containing payment details.</param>
+            <remarks>
+            The properties of the <c>request</c> parameter are described below: 
+            <list type="bullet">
+            <item><term>creditCardNumber</term> The credit card number for this transaction</item>
+            <item><term>cardHolder</term> The customer name shown on the credit card</item>
+            <item><term>expirationDate</term> The expiration date on the credit card</item>
+            <item><term>securityCode</term> The 3-digit security code on the credit card, if available</item>
+            <item><term>amount</term> The amount to be processed, in British pounds</item>
+            </list>
+            </remarks>
+            <returns>A JSON object containing <c>success</c> (boolean) and <c>message</c> (string) properties.</returns>
+            <response code="200">Success! Processing was completed successfully.</response> 
+            <response code="500">Error! Processing failed due to service unavailability or other error.</response>
+        </member>
+    </members>
+</doc>
