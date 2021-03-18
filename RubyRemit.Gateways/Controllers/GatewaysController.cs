@@ -3,13 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using RubyRemit.Domain.DTOs;
 using RubyRemit.Infrastructure.PaymentGateways.Contracts;
 using System;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace RubyRemit.Gateways.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/gateways")]
     public class GatewaysController : ControllerBase
     {
 
@@ -37,6 +36,7 @@ namespace RubyRemit.Gateways.Controllers
         /// <item><term>expirationDate</term> The expiration date on the credit card</item>
         /// <item><term>securityCode</term> The 3-digit security code on the credit card, if available</item>
         /// <item><term>amount</term> The amount to be processed, in British pounds</item>
+        /// <item><term>gatewayOption</term> Specifies the category of payment gateway to use, either <c>cheap</c> or <c>expensive</c></item>
         /// </list>
         /// </remarks>
         /// <returns>A JSON object containing <c>success</c> (boolean) and <c>message</c> (string) properties.</returns>

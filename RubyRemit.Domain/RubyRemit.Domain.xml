@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>RubyRemit.Domain</name>
+    </assembly>
+    <members>
+        <member name="T:RubyRemit.Domain.DTOs.GatewayRequest">
+            <summary>
+            Describes a processing request being sent by the main API to the external payment gateway.
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.GatewayRequest.GatewayOption">
+            <summary>
+            Specifies what category of payment gateway to use. The value is any of <c>cheap</c> or <c>expensive</c>.
+            </summary>
+        </member>
+        <member name="T:RubyRemit.Domain.DTOs.GatewayResponse">
+            <summary>
+            Response body returned to consuming clients, with <c>succeeded</c> and <c>message</c> properties
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.GatewayResponse.Succeeded">
+            <summary>
+            Boolean value indicating if the gateway successfully processed the request
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.GatewayResponse.Message">
+            <summary>
+            Brief confirmation or error message, depending on the outcome of the processing request
+            </summary>
+        </member>
+        <member name="T:RubyRemit.Domain.DTOs.MainRequestBody">
+            <summary>
+            Describes a payment transaction which the user intends to process.
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.MainRequestBody.CreditCardNumber">
+            <summary>
+            User's credit card number. This is a required field. 
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.MainRequestBody.CardHolder">
+            <summary>
+            Name of the cardholder as shown on the credit card. This is a required field.
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.MainRequestBody.ExpirationDate">
+            <summary>
+            Card expiration date as shown on the credit card. This is a required field.
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.MainRequestBody.SecurityCode">
+            <summary>
+            Security code shown on the credit card. This is an optional field.
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.MainRequestBody.Amount">
+            <summary>
+            Amount to be processed. This is a required field.
+            </summary>
+        </member>
+        <member name="T:RubyRemit.Domain.DTOs.MainResponseBody">
+            <summary>
+            Default response body for all requests, with <c>succeeded</c>, <c>message</c> and <c>data</c> properties. 
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.MainResponseBody.Succeeded">
+            <summary>
+            Boolean value indicating if the request is successful or not
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.MainResponseBody.Message">
+            <summary>
+            Brief confirmation message if the request is successful, or error message otherwise.
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.MainResponseBody.Data">
+            <summary>
+            If not null, contains the payload returned for the request.
+            </summary>
+        </member>
+        <member name="T:RubyRemit.Domain.DTOs.PaymentDTO">
+            <summary>
+            Summarizes the payment information supplied by the user for processing.
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.PaymentDTO.Id">
+            <summary>
+            Unique identifier for this payment record
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.PaymentDTO.CreditCardNumber">
+            <summary>
+            Credit card number entered by the user
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.PaymentDTO.CardHolder">
+            <summary>
+            Cardholder name entered by the user
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.PaymentDTO.Amount">
+            <summary>
+            Amount specified by the user
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.PaymentDTO.ProcessingAttempts">
+            <summary>
+            List of processing attempts for this payment  
+            </summary>
+        </member>
+        <member name="T:RubyRemit.Domain.DTOs.PaymentStateDTO">
+            <summary>
+            Describes a specific attempt made at processing a payment.
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.PaymentStateDTO.State">
+            <summary>
+            Status of the processing attempt. The value is any of <c>pending</c>,  <c>processed</c> or  <c>failed</c>.
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.PaymentStateDTO.DateAttempted">
+            <summary>
+            Date and time the processing was attempted
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.PaymentStateDTO.Gateway">
+            <summary>
+            Category of payment gateway used. The value is either <c>cheap</c> or <c>expensive</c>.
+            </summary>
+        </member>
+        <member name="P:RubyRemit.Domain.DTOs.PaymentStateDTO.Remark">
+            <summary>
+            Transaction summary or error message, based on the response received from the payment gateway
+            </summary>
+        </member>
+    </members>
+</doc>
