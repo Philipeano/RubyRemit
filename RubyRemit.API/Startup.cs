@@ -12,6 +12,10 @@ using RubyRemit.Domain.Interfaces;
 using RubyRemit.Infrastructure;
 using RubyRemit.Infrastructure.AutoMapperSettings.Profiles;
 using RubyRemit.Infrastructure.Repositories;
+using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 
 namespace RubyRemit.Api
 {
@@ -52,17 +56,55 @@ namespace RubyRemit.Api
             services.AddScoped<IValidator, Validator>();
             services.AddScoped<IOrchestrator, Orchestrator>();
 
+            services.AddAutoMapper(c => c.AddProfile<DefaultProfile>(), typeof(Startup));
+
             services.AddHttpClient("paymentGateway", c =>
             {
                 if (_hostingEnv.IsDevelopment())
-                    c.BaseAddress = new System.Uri("https://localhost:2000/");
+                    c.BaseAddress = new Uri("https://localhost:2000/");
                 else
-                    c.BaseAddress = new System.Uri("https://gateways.rubyremit.herokuapp.com");
+                    c.BaseAddress = new Uri("https://gateways.rubyremit.herokuapp.com/");
                 c.DefaultRequestHeaders.Add("Accept", "application/json");
-                c.Timeout = new System.TimeSpan(0, 0, 30);
+                c.Timeout = new TimeSpan(0, 0, 30);
             });
 
-            services.AddAutoMapper(c => c.AddProfile<DefaultProfile>(), typeof(Startup));
+            services.AddSwaggerGen(setupAction =>
+            {
+                // Create and configure OpenAPI specification document with basic information 
+                setupAction.SwaggerDoc("RubyRemitOpenAPISpecs",
+                    new Microsoft.OpenApi.Models.OpenApiInfo()
+                    {
+                        Title = "RubyRemit API",
+                        Version = "1",
+                        Description = "RubyRemit API enables users to submit payment information for processing via an external gateway. " +
+                        "This is a work in progress. Consequently, certain features such as 'authentication' will be available in a future version.",
+                        Contact = new Microsoft.OpenApi.Models.OpenApiContact()
+                        {
+                            Email = "philipeano@gmail.com",
+                            Name = "Philip Newman",
+                            Url = new Uri("https://www.twitter.com/philipeano")
+                        },
+                        License = new Microsoft.OpenApi.Models.OpenApiLicense()
+                        {
+                            Name = "MIT License",
+                            Url = new Uri("https://opensource.org/licenses/MIT")
+                        }
+                    });
+
+                //Fetch all XML output documents, and include their content in the OpenAPI specification
+                var currentAssembly = Assembly.GetExecutingAssembly();
+                var linkedAssemblies = currentAssembly.GetReferencedAssemblies();
+                var fullAssemblyList = linkedAssemblies.Union(new AssemblyName[] { currentAssembly.GetName() });
+                var xmlCommentFiles = fullAssemblyList
+                    .Select(a => Path.Combine(AppContext.BaseDirectory, $"{a.Name}.xml"))
+                    .Where(f => File.Exists(f))
+                    .ToArray();
+
+                foreach (string xmlFile in xmlCommentFiles)
+                {
+                    setupAction.IncludeXmlComments(xmlFile);
+                }
+            });
         }
 
 
@@ -79,10 +121,15 @@ namespace RubyRemit.Api
             }
 
             app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-
             app.UseHttpsRedirection();
-
             app.UseRouting();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(setupAction =>
+            {
+                setupAction.SwaggerEndpoint("/swagger/RubyRemitOpenAPISpecs/swagger.json", "RubyRemit API");
+                setupAction.RoutePrefix = "";
+            });
 
             app.UseEndpoints(endpoints =>
             {
